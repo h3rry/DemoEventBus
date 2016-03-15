@@ -1,7 +1,5 @@
 package com.h3rry.demoeventbus.request;
 
-import android.util.Log;
-
 import com.h3rry.demoeventbus.event.MyEvent;
 import com.h3rry.demoeventbus.model.City;
 
@@ -42,15 +40,11 @@ public class CityRequest {
                     city.setName(jsonObject.getString("city"));
                     city.setLatitude(jsonObject.getDouble("lat"));
                     city.setLongitude(jsonObject.getDouble("long"));
-                    Log.d("demo.eventbus", city.toString());
                     EventBus.getDefault().post(new MyEvent("Success", city));
-                    Log.d("demo.eventbus", "send eventbus done");
                 } catch (JSONException e) {
-                    Log.e("demo.eventbus", e.getMessage());
                     EventBus.getDefault().post(new MyEvent("JSONException " + e.getMessage(), null));
                 } catch (IOException e) {
                     EventBus.getDefault().post(new MyEvent("IOException " + e.getMessage(), null));
-                    Log.e("demo.eventbus", e.getMessage());
                 }
             }
         });
