@@ -1,52 +1,73 @@
 package com.h3rry.demoeventbus;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.widget.TextView;
+
+import com.h3rry.demoeventbus.event.MyEvent;
+import com.h3rry.demoeventbus.request.CityRequest;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 public class MainActivity extends AppCompatActivity {
+
+    private TextView txtCity;
+    private TextView txtLongitude;
+    private TextView txtLatitude;
+    private TextView txtMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        txtCity = (TextView) findViewById(R.id.textCity);
+        txtLongitude = (TextView) findViewById(R.id.textLng);
+        txtLatitude = (TextView) findViewById(R.id.textLat);
+        txtMessage = (TextView) findViewById(R.id.textMessage);
+
+        findViewById(R.id.buttonGo).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onClick(View v) {
+                readStaticJSON();
             }
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    private void readStaticJSON() {
+        CityRequest request = new CityRequest();
+        request.run();
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    protected void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(MyEvent event) {
+        Log.i("demo.eventbus", "Event received");
+        txtMessage.setText("Status: " + event.message);
+        if (event.message.equalsIgnoreCase("success")) {
+            txtCity.setText("City: " + event.city.getName());
+            txtLatitude.setText("Latitude: " + event.city.getLatitude());
+            txtLongitude.setText("Longitude: " + event.city.getLongitude());
+        } else {
+            txtCity.setText("City: ");
+            txtLatitude.setText("Latitude: ");
+            txtLongitude.setText("Longitude: ");
         }
-
-        return super.onOptionsItemSelected(item);
     }
+
 }
